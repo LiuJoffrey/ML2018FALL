@@ -85,21 +85,27 @@ data = np.load("propress_18_5760.npy")
 
 ### normalize data by feature ###
 normal_min_max = []
-
+selected_data = []
+choose_index = [0,1,2,3,4,5,6,7,8,9,12,13]
 for i in range(data.shape[0]):
-    feature = data[i].astype(float)
-    
-    feature_min = min(feature)
-    feature_max = max(feature)
-    nor_feature = (feature-feature_min)/(feature_max-feature_min)
-    data[i] = nor_feature
-    normal_min_max.append((feature_min, feature_max))
+    if i in choose_index:
+        feature = data[i].astype(float)
+        
+        feature_min = min(feature)
+        feature_max = max(feature)
+        nor_feature = (feature-feature_min)/(feature_max-feature_min)
+        #data[i] = nor_feature
+        selected_data.append(nor_feature)
+        normal_min_max.append((feature_min, feature_max))
 
 
 normal_min_max = np.array(normal_min_max)
 np.save("normal_min_max", normal_min_max)
 print(normal_min_max.shape)
-
+###
+data = np.array(selected_data)
+print(data.shape)
+###
 
 ### to get 471 data in a month and by 12 months ###
 x_data = []
@@ -176,12 +182,14 @@ lr = np.array([10]*x_data.shape[1])
 weight, loss_history = GradientDescent(x_data,y_data,lr)
 print(weight)
 
-np.save("162_feature_weight", weight)
+np.save("108_feature_weight", weight)
 
 # data.to_csv(arg[2])
 
 
-weight = np.load("162_feature_weight.npy")
+
+
+weight = np.load("108_feature_weight.npy")
 print(weight.shape)
 print(x_data.shape)
 var_ = np.dot(x_data, weight.transpose())
