@@ -6,14 +6,16 @@ import math
 import sys
 from itertools import combinations
 arg = sys.argv
-
-w = np.load('11_6_feature_weight.npy')
+# 11_6_feature_weight.npy
+# after_try
+w = np.load('6_49535.npy')
 normal_min_max = np.load('normal_min_max.npy')
 test_x = []
 n_row = 0
 text = open(arg[1] ,"r")
 row = csv.reader(text , delimiter= ",")
-feature = [4,5,6,7,8,9]
+feature = [4,5,6,7,8,9] # 6.61285
+feature = [2,4,5,6,7,8,9,12] # 6.49535
 for r in row:
     if n_row %18 == 0:
         test_x.append([])
@@ -42,7 +44,7 @@ print(test_x.shape)
 test_after = []
 for i in range(test_x.shape[0]):
     each_after = []
-    for j in range(6):
+    for j in range(8):
         d = test_x[i, j*9:(j+1)*9]
         for k in range(len(d)):
             if k == 0:
@@ -81,6 +83,3 @@ s.writerow(["id","value"])
 for i in range(len(out)):
     s.writerow(out[i]) 
 submission.close()
-
-
-

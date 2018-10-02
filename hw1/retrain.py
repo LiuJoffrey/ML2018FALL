@@ -12,9 +12,9 @@ arg = sys.argv
 def gradient_descent(x,y):
     w = np.matmul(np.matmul(inv(np.matmul(x.transpose(),x)),x.transpose()),y)
     """
-    #w = np.zeros(len(x[0]))
-    l_rate = 0.00000001
-    repeat = 1
+    w = np.zeros(len(x[0]))
+    l_rate = 10
+    repeat = 10000
     x_t = x.transpose()
     s_gra = np.zeros(len(x[0]))
 
@@ -93,7 +93,7 @@ for i in range(1,20):
         total_try.append(row)
 print(len(total_try))
 total_try = []
-total_try.append([4,5,6,7,8,9])
+total_try.append([2,4,5,6,7,8,9,12])
 min_error = 100
 combination = []
 min_error_12 = []
@@ -238,7 +238,9 @@ for try_index in range(len(total_try))[:]:
     cost_a  = math.sqrt(cost)
 
     print("final: ", cost_a)
-    np.save("11_6_feature_weight", weight)
+    print()
+    print(weight)
+    np.save("after_try", weight)
 
 """
     for vali_index in range(12):
