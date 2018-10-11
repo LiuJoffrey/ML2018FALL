@@ -6,28 +6,42 @@ import math
 import sys
 from itertools import combinations
 arg = sys.argv
+import matplotlib.pyplot as plt
 
 
-
-def gradient_descent(x,y):
+def gradient_descent(x,y,normal_min_max, lr,regularization):
     w = np.matmul(np.matmul(inv(np.matmul(x.transpose(),x)),x.transpose()),y)
+    
+    #loss_history = []
     """
+    
     w = np.zeros(len(x[0]))
-    l_rate = 10
+    l_rate = lr
     repeat = 10000
     x_t = x.transpose()
     s_gra = np.zeros(len(x[0]))
 
     for i in range(repeat):
+
+        var_ = np.dot(x, w)
+        var_ = var_ * (normal_min_max[9][0]-normal_min_max[9][1]) + normal_min_max[9][1]
+        total_y_data = y * (normal_min_max[9][0]-normal_min_max[9][1]) + normal_min_max[9][1]
+        diff = total_y_data - var_
+        cost = np.sum(diff**2) / len(var_)
+        cost_sqrt  = math.sqrt(cost)
+        #print ('iteration: %d | Cost: %f  ' % ( i,cost_sqrt))
+        loss_history.append(cost_sqrt)
         hypo = np.dot(x,w)
         loss = hypo - y
         cost = np.sum(loss**2) / len(x)
         cost_a  = math.sqrt(cost)
-        gra = np.dot(x_t,loss)
+        gra = np.dot(x_t,loss) + (regularization * w)/len(x)
         s_gra += gra**2
         ada = np.sqrt(s_gra)
         w = w - l_rate * gra/ada
-        print ('iteration: %d | Cost: %f  ' % ( i,cost_a))
+
+        
+        #print ('iteration: %d | Cost: %f  ' % ( i,cost_a))
     
     #w = np.dot(np.dot(inv(np.dot(x,x.transpose())), x), y)
     #w = np.matmul(np.matmul(inv(np.matmul(x.transpose(),x)),x.transpose()),y)
@@ -83,6 +97,7 @@ np.save("normal_min_max",normal_min_max)
 
 print(data.shape)
 y_label = data[9]
+"""
 total_try = []
 for i in range(1,20):
     index = np.arange(0,19)
@@ -92,8 +107,13 @@ for i in range(1,20):
         #print(row)
         total_try.append(row)
 print(len(total_try))
+"""
 total_try = []
-total_try.append([2,4,5,6,7,8,9,12])
+
+total_try.append([2,4,5,6,7,8,9,12]) # CO, NO, NO2, NOx,O3,PM10,PM2.5, SO2
+#total_try.append([4,5,6,8,9,12]) # CO, NO, NO2, NOx,O3,PM10,PM2.5, SO2
+#total_try.append([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17])
+#total_try.append([9])
 min_error = 100
 combination = []
 min_error_12 = []
@@ -108,96 +128,78 @@ for try_index in range(len(total_try))[:]:
     # 12 month
     for i in range(12):
         # 一個月連續10小時的data有471筆
-        for j in range(471):
+        for j in range(476):
             x_data.append([])
             # 19 污染物
             for t in range(19):
                 # 嘗試各種組合
                 if t in feature:
-                    for s in range(9):
-                        x_data[471*i+j].append(float(data[t][480*i+j+s]))
+                    for s in range(4):
+                        x_data[476*i+j].append(float(data[t][480*i+j+s]))
 
-            y_data.append(float(y_label[480*i+j+9]))
+            y_data.append(float(y_label[480*i+j+4]))
     
 
     x_data = np.array(x_data)
     x_data = np.concatenate((x_data,np.ones((x_data.shape[0],1))), axis=1)
+    y_data = np.array(y_data)
+
+    print(x_data.shape)
     
     ### delete 3month in x_data ###
-    first_part = x_data[:7*157]
-    second_part = x_data[8*157:9*157]
-    last_part = x_data[10*157:]
+    first_part = x_data[:14*84]
+    second_part = x_data[15*84:17*84]
+    last_part = x_data[18*84:]
     x_data = np.append(first_part,second_part, axis=0)
     x_data = np.append(x_data, last_part,axis=0)
     
     y_data = np.array(y_data)
     
-    first_part = y_data[:7*157]
-    second_part = y_data[8*157:9*157]
-    last_part = y_data[10*157:]
+    first_part = y_data[:14*84]
+    second_part = y_data[15*84:17*84]
+    last_part = y_data[18*84:]
     y_data = np.append(first_part,second_part, axis=0)
     y_data = np.append(y_data,last_part, axis=0)
     
     total_x_data = x_data
     total_y_data = y_data
+
+
     average_error = 0
     error_12 = []
+
     
+
+    """
     # 3 4 月 不太好
     # 12 month validation, 11 is 12 months - 4 moths
     # 36 is 157 for a batch
-    for vali_index in range(34):
+    for vali_index in range(68):
         if vali_index == 0:
-            vali = x_data[vali_index*157:vali_index*157+157]
-            vali_label = y_data[vali_index*157:vali_index*157+157]
-            train = x_data[(vali_index+1)*157:]
-            train_label = y_data[(vali_index+1)*157:]
+            vali = x_data[vali_index*84:vali_index*84+84]
+            vali_label = y_data[vali_index*84:vali_index*84+84]
+            train = x_data[(vali_index+1)*84:]
+            train_label = y_data[(vali_index+1)*84:]
             
-        elif vali_index == 35:
-            vali = x_data[vali_index*157:vali_index*157+157]
-            train = x_data[:(vali_index)*157]
-            vali_label = y_data[vali_index*157:vali_index*157+157]
-            train_label = y_data[:(vali_index)*157]
+        elif vali_index == 67:
+            vali = x_data[vali_index*84:vali_index*84+84]
+            train = x_data[:(vali_index)*84]
+            vali_label = y_data[vali_index*84:vali_index*84+84]
+            train_label = y_data[:(vali_index)*84]
         else:
             
-            vali = x_data[vali_index*157:vali_index*157+157]
-            vali_label = y_data[vali_index*157:vali_index*157+157]
-            first = x_data[:vali_index*157]
-            first_label = y_data[:vali_index*157]
-            last = x_data[(vali_index+1)*157:]
-            last_label = y_data[(vali_index+1)*157:]
+            vali = x_data[vali_index*84:vali_index*84+84]
+            vali_label = y_data[vali_index*84:vali_index*84+84]
+            first = x_data[:vali_index*84]
+            first_label = y_data[:vali_index*84]
+            last = x_data[(vali_index+1)*84:]
+            last_label = y_data[(vali_index+1)*84:]
             train = np.append(first,last, axis=0)
             train_label = np.append(first_label,last_label, axis=0)
-    
-        """
-        train_after = []
-        train_label_after = []
-        
-        for i in range(train.shape[0]):
-            if_zero = False
-            for j in range(train.shape[1])[45:]:
-                if train[i,j] <= 0:
-                    if_zero = True
-                    continue
-            if if_zero is not True:
-                train_after.append(train[i])
-                train_label_after.append(train_label[i])
-        
-        train = np.array(train_after)
-        train_label = np.array(train_label_after)
-        print("train_after: ", train.shape)
-        print("train_label_after: ", train_label.shape)
-        """
-        """
-        vali_after = []
-        vali_label_after = []
-        
-        for i in range(vali.shape[0]):
-            for j in range(vali.shape[1]):
-                if j % 9
-        """
-
-        weight = gradient_descent(train,train_label)
+        vali = np.array(vali)
+        print(vali.shape)
+        weight = gradient_descent(train,train_label,normal_min_max, 10,0)
+        print(weight.shape)
         var_ = np.dot(vali, weight)
         var_ = var_ * (normal_min_max[9][0]-normal_min_max[9][1]) + normal_min_max[9][1]
         vali_label = vali_label * (normal_min_max[9][0]-normal_min_max[9][1]) + normal_min_max[9][1]
@@ -206,10 +208,10 @@ for try_index in range(len(total_try))[:]:
         cost_a  = math.sqrt(cost)
         average_error += cost_a
         error_12.append(cost_a)
+    
+    
 
-
-
-    average_error = average_error/34
+    average_error = average_error/68
     print("com: ", feature)
     print("average_error: ", average_error)
     print("error_12: ", error_12)
@@ -227,20 +229,72 @@ for try_index in range(len(total_try))[:]:
     print("len(total_good_combin): ", len(total_good_combin))
     #print("total_good_combin: ", total_good_combin)
     print()
+    """
+    
+
+    total_x_data_after = []
+    total_y_data_after = []
+
+    
+    for i in range(total_x_data.shape[0]):
+        b = True
+        for j in range(total_x_data.shape[1]):
+            if total_x_data[i,j] == 0:
+                b = False
+                break
+        if b:
+            total_x_data_after.append(total_x_data[i])
+            total_y_data_after.append(total_y_data[i])
+    
+    total_x_data = np.array(total_x_data_after)
+    total_y_data = np.array(total_y_data_after)
 
 
-    weight = gradient_descent(total_x_data,total_y_data)
-    var_ = np.dot(total_x_data, weight)
-    var_ = var_ * (normal_min_max[9][0]-normal_min_max[9][1]) + normal_min_max[9][1]
-    total_y_data = total_y_data * (normal_min_max[9][0]-normal_min_max[9][1]) + normal_min_max[9][1]
-    diff = total_y_data - var_
-    cost = np.sum(diff**2) / len(var_)
-    cost_a  = math.sqrt(cost)
+    differen_loss_lr = []
+    #learning_rate = [10,0.01,0.0001,0.00001]
+    learning_rate = [10]
+    regularization = [0]
+    for re in regularization[:]:
 
-    print("final: ", cost_a)
-    print()
-    print(weight)
-    np.save("after_try", weight)
+        weight = gradient_descent(total_x_data,total_y_data,normal_min_max, 10,re)
+        #differen_loss_lr.append(loss_history)
+        var_ = np.dot(total_x_data, weight)
+        var_ = var_ * (normal_min_max[9][0]-normal_min_max[9][1]) + normal_min_max[9][1]
+        y = total_y_data * (normal_min_max[9][0]-normal_min_max[9][1]) + normal_min_max[9][1]
+        diff = y - var_
+        cost = np.sum(diff**2) / len(var_)
+        cost_a  = math.sqrt(cost)
+
+        print("final: ", cost_a)
+        print()
+        #print(weight)
+        np.save("6_2", weight)
+    print(len(differen_loss_lr))
+    count = 0
+    
+    
+    
+    
+    
+    
+    
+    """
+    for history in differen_loss_lr:
+
+        plt.plot(history, label=str(learning_rate[count]))
+        plt.ylabel('Training Loss')
+        plt.xlabel('Epoch')
+        plt.axis([0, 10000, 0, 40])
+        
+        count += 1
+    plt.legend()
+    plt.show()
+    """
+
+
+
+
+
 
 """
     for vali_index in range(12):

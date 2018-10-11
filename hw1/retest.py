@@ -8,7 +8,8 @@ from itertools import combinations
 arg = sys.argv
 # 11_6_feature_weight.npy
 # after_try
-w = np.load('6_49535.npy')
+#w = np.load('6_49535.npy')
+w = np.load('6_2.npy')
 normal_min_max = np.load('normal_min_max.npy')
 test_x = []
 n_row = 0
@@ -16,15 +17,18 @@ text = open(arg[1] ,"r")
 row = csv.reader(text , delimiter= ",")
 feature = [4,5,6,7,8,9] # 6.61285
 feature = [2,4,5,6,7,8,9,12] # 6.49535
+#feature = [4,5,6,8,9,12]
+#feature = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
+#feature = [9] # 6.49535
 for r in row:
     if n_row %18 == 0:
         test_x.append([])
         if n_row in feature:
-            for i in range(2,11):
+            for i in range(7,11):
                 test_x[n_row//18].append(float(r[i]))
     else :
         if (n_row%18) in feature:
-            for i in range(2,11):
+            for i in range(7,11):
                 if r[i] !="NR":
                     test_x[n_row//18].append((float(r[i])-normal_min_max[(n_row%18)][1])/(normal_min_max[(n_row%18)][0]-normal_min_max[(n_row%18)][1]))
                 else:
@@ -32,20 +36,21 @@ for r in row:
     n_row = n_row+1
 text.close()
 test_x = np.array(test_x)
-print(test_x.shape)
+print("1:", test_x.shape)
 # add square term
 # test_x = np.concatenate((test_x,test_x**2), axis=1)
 
 # add bias
 test_x = np.concatenate((test_x,np.ones((test_x.shape[0],1))), axis=1)
 
-print(test_x.shape)
+print("2: ", test_x.shape)
 
 test_after = []
 for i in range(test_x.shape[0]):
     each_after = []
+    # 要調整有幾個feature
     for j in range(8):
-        d = test_x[i, j*9:(j+1)*9]
+        d = test_x[i, j*4:(j+1)*4]
         for k in range(len(d)):
             if k == 0:
                 if d[k]<=0:
@@ -54,8 +59,11 @@ for i in range(test_x.shape[0]):
                 if d[k]<=0:
                     d[k] = d[k-1]
             else:
-                if d[k]<=0:
+                if d[k]<=0 and d[k+1]<=0:
+                    d[k] = d[k-1]
+                elif d[k]<=0 and d[k+1]>0:
                     d[k] = (d[k-1]+d[k+1])/2
+                
             each_after.append(d[k])
     test_after.append(each_after)
 test_after = np.array(test_after)
