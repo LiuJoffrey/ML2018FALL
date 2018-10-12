@@ -6,7 +6,7 @@ import math
 import sys
 from itertools import combinations
 arg = sys.argv
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 def gradient_descent(x,y,normal_min_max, lr,regularization):
