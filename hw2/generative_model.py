@@ -21,6 +21,12 @@ pay_cate_nor = []
 pay_ment_nor = []
 def trans_num_attrs(data, numeric_attrs):
     # [<25], [25~30], [35~40], [40~45], [>45]
+    
+    for i in ['LIMIT_BAL']:
+        name = i+"square"
+        numeric_attrs.append(name)
+        data[name] = data[i]**2
+
     bining = [0,28,34,41,100] 
     bining_num = 4
     bining_attr = 'AGE'
@@ -52,7 +58,7 @@ def trans_num_attrs(data, numeric_attrs):
     return data
 
 def encode_cate_attrs(data, cate_attrs):
-    """
+    
     educateion = "EDUCATION" 
     edu = np.array(data[educateion].values)
     for i in range(edu.shape[0]):
@@ -60,7 +66,7 @@ def encode_cate_attrs(data, cate_attrs):
             edu[i] = 4
     data[educateion] = edu
     #print(data[educateion][130])
-
+    """
     marrige = 'MARRIAGE'
     mar = np.array(data[marrige].values)
     for i in range(mar.shape[0]):
@@ -69,16 +75,40 @@ def encode_cate_attrs(data, cate_attrs):
     data[marrige] = mar
     """
     print("encode_cate_attrs...")
-    for i in cate_attrs[:]:
+    for i in cate_attrs[:3]:
         dummies_df = pd.get_dummies(data[i])
+        
         dummies_df = dummies_df.rename(columns=lambda x: i+'_'+str(x))
+        
         data = pd.concat([data,dummies_df],axis=1)
         data = data.drop(i, axis=1)
+    name = [-2,-1,0,1,2,3,4,5,6,7,8]
+    for i in cate_attrs[3:]:
+        dummies_df = pd.get_dummies(data[i])
 
+        missing_cols = set( name ) - set( dummies_df.columns )
+        for c in missing_cols:
+            dummies_df[c] = 0
+        dummies_df = dummies_df[name]
+          
+        dummies_df = dummies_df.rename(columns=lambda x: i+'_'+str(x))
+        
+        data = pd.concat([data,dummies_df],axis=1)
+        data = data.drop(i, axis=1)
     return data
 
 def trans_pay_cate_attr(data, pay_cate_attr):
     print("trans_pay_cate_attr...")
+    """
+    pay_cate_attr_square=[]
+    for i in pay_cate_attr:
+        print(i)
+        name = i+"square"
+        pay_cate_attr_square.append(i)
+        pay_cate_attr_square.append(name)
+        
+        data[name] = data[i]**2
+    """
     for i in pay_cate_attr:
         
         mean = data[i].mean()
@@ -97,7 +127,15 @@ def trans_pay_cate_attr(data, pay_cate_attr):
 
 def trans_payment_attr(data, payment_attr):
     print("trans_payment_attr...")
+    """
+    payment_attr_square = []
+    for i in payment_attr_square:
+        name = i+"square"
+        payment_attr_square.append(i)
+        payment_attr_square.append(name)
         
+        data[name] = data[i]**2
+    """
     for i in payment_attr:
         
         mean = data[i].mean()
@@ -117,9 +155,20 @@ def trans_payment_attr(data, payment_attr):
 def fill_unknown(data, label_data, numeric_attrs, payment_attr, pay_cate_attr, cate_attrs):
     data = trans_num_attrs(data, numeric_attrs)
     data = encode_cate_attrs(data, cate_attrs)
-    data = trans_pay_cate_attr(data, pay_cate_attr)
+    """
+    for i in cate_attrs:
+        mean = data[i].mean()
+        std = data[i].std()
+        data[i] = (data[i] - mean) / std
+    """
+    #data = trans_pay_cate_attr(data, pay_cate_attr)
     data = trans_payment_attr(data, payment_attr)
-
+    """
+    col = ['BILL_AMT1', 'EDUCATION', 'SEX', 'PAY_AMT5', 'PAY_0', 'AGE', 'PAY_AMT2', 'PAY_AMT6', 'PAY_AMT3', 'PAY_AMT1', 'BILL_AMT6', 'PAY_AMT4', 'PAY_5', 'BILL_AMT3', 'BILL_AMT5']
+    data = data[col]
+    cate_attrs = ["SEX", "EDUCATION"]
+    data = encode_cate_attrs(data, cate_attrs)
+    """
     return data
 
 def preprocess_data():
@@ -136,7 +185,7 @@ def preprocess_data():
     payment_attr = ['BILL_AMT1', 'BILL_AMT2', 'BILL_AMT3', 'BILL_AMT4', 'BILL_AMT5','BILL_AMT6', 
                     'PAY_AMT1','PAY_AMT2', 'PAY_AMT3', 'PAY_AMT4', 'PAY_AMT5', 'PAY_AMT6']
     pay_cate_attr = ['PAY_0', 'PAY_2', 'PAY_3', 'PAY_4', 'PAY_5', 'PAY_6']   
-    cate_attrs = ['SEX', 'EDUCATION','MARRIAGE']
+    cate_attrs = ['SEX', 'EDUCATION','MARRIAGE','PAY_0', 'PAY_2', 'PAY_3', 'PAY_4', 'PAY_5', 'PAY_6']
 
     data = fill_unknown(data, label_data, numeric_attrs, payment_attr, pay_cate_attr, cate_attrs)
     
@@ -153,6 +202,9 @@ def class_mean_star(data):
     return mean_star
 
 data, label_data = preprocess_data()
+print(data.shape)
+column = data.columns
+
 ### positive and negitive ###
 positive_data = data[label_data["Y"]==1] # 4445
 positive_label = label_data[label_data["Y"]==1]
@@ -177,20 +229,20 @@ same_sigma = pc1 * sigma_one + pc2 * sigma_two
 
 same_sigma_inv = np.linalg.pinv(same_sigma)
 w = np.matmul((class_one_mean-class_two_mean), same_sigma_inv)
-print(w.shape)
+
 b = (-0.5)*np.dot(np.dot([class_one_mean], same_sigma_inv), class_one_mean) + (0.5)*np.dot(np.dot([class_two_mean], same_sigma_inv), class_two_mean)+np.log(len(pos_data)/len(neg_data))
-print(b.shape)
+
 
 total_xtrain = np.concatenate((pos_data, neg_data), axis=0)
 total_ytrain = np.append(pos_label, neg_label)
 
 ans = np.dot(total_xtrain, w) + b
 ans = sigmoid(ans)
-print(ans.shape)
+
 
 pridict = []
 for i in ans:
-    if i > 0.5:
+    if i > 0.4:
         pridict.append(1)
     else:
         pridict.append(0)
@@ -199,7 +251,8 @@ acc = 0
 for i in range(len(pridict)):
     if pridict[i] == total_ytrain[i]:
         acc += 1
-print(acc/20000)
+print(acc/20000)    
+
 
 np.save("gen_w", w)
 np.save("gen_b", b)
@@ -209,5 +262,5 @@ pay_cate_nor = np.array(pay_cate_nor)
 pay_ment_nor = np.array(pay_ment_nor)
 
 np.save("num_nor", num_nor)
-np.save("pay_cate_nor", pay_cate_nor)
+#np.save("pay_cate_nor1", pay_cate_nor)
 np.save("pay_ment_nor", pay_ment_nor)

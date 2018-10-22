@@ -15,7 +15,10 @@ def trans_num_attrs(data, numeric_attrs):
     
     data[bining_attr] = pd.cut(data[bining_attr], bining)
     data[bining_attr] = pd.factorize(data[bining_attr])[0]
-    
+    for i in ['LIMIT_BAL']:
+        name = i+"square"
+        numeric_attrs.append(name)
+        data[name] = data[i]**2
     print("trans_num_attrs...")
     count = 0
     for i in numeric_attrs:
@@ -34,7 +37,7 @@ def trans_num_attrs(data, numeric_attrs):
         """
     return data
 def encode_cate_attrs(data, cate_attrs):
-    """
+    
     educateion = "EDUCATION" 
     edu = np.array(data[educateion].values)
     for i in range(edu.shape[0]):
@@ -42,7 +45,7 @@ def encode_cate_attrs(data, cate_attrs):
             edu[i] = 4
     data[educateion] = edu
     #print(data[educateion][130])
-
+    """
     marrige = 'MARRIAGE'
     mar = np.array(data[marrige].values)
     for i in range(mar.shape[0]):
@@ -51,16 +54,31 @@ def encode_cate_attrs(data, cate_attrs):
     data[marrige] = mar
     """
     print("encode_cate_attrs...")
-    for i in cate_attrs[:]:
+    for i in cate_attrs[:3]:
         dummies_df = pd.get_dummies(data[i])
+        
         dummies_df = dummies_df.rename(columns=lambda x: i+'_'+str(x))
+        
+        data = pd.concat([data,dummies_df],axis=1)
+        data = data.drop(i, axis=1)
+    name = [-2,-1,0,1,2,3,4,5,6,7,8]
+    for i in cate_attrs[3:]:
+        dummies_df = pd.get_dummies(data[i])
+
+        missing_cols = set( name ) - set( dummies_df.columns )
+        for c in missing_cols:
+            dummies_df[c] = 0
+        dummies_df = dummies_df[name]
+          
+        dummies_df = dummies_df.rename(columns=lambda x: i+'_'+str(x))
+        
         data = pd.concat([data,dummies_df],axis=1)
         data = data.drop(i, axis=1)
 
     return data
 def trans_pay_cate_attr(data, pay_cate_attr):
     print("trans_pay_cate_attr...")
-    pay_cate_nor = np.load("pay_cate_nor.npy")
+    pay_cate_nor = np.load("pay_cate_nor1.npy")
     count = 0
     for i in pay_cate_attr:
         
@@ -101,7 +119,7 @@ def trans_payment_attr(data, payment_attr):
 def fill_unknown(data, numeric_attrs, payment_attr, pay_cate_attr, cate_attrs):
     data = trans_num_attrs(data, numeric_attrs)
     data = encode_cate_attrs(data, cate_attrs)
-    data = trans_pay_cate_attr(data, pay_cate_attr)
+    #data = trans_pay_cate_attr(data, pay_cate_attr)
     data = trans_payment_attr(data, payment_attr)
 
     return data
@@ -117,7 +135,7 @@ def preprocess_data():
     payment_attr = ['BILL_AMT1', 'BILL_AMT2', 'BILL_AMT3', 'BILL_AMT4', 'BILL_AMT5','BILL_AMT6', 
                     'PAY_AMT1','PAY_AMT2', 'PAY_AMT3', 'PAY_AMT4', 'PAY_AMT5', 'PAY_AMT6']
     pay_cate_attr = ['PAY_0', 'PAY_2', 'PAY_3', 'PAY_4', 'PAY_5', 'PAY_6']   
-    cate_attrs = ['SEX', 'EDUCATION','MARRIAGE']
+    cate_attrs = ['SEX', 'EDUCATION','MARRIAGE','PAY_0', 'PAY_2', 'PAY_3', 'PAY_4', 'PAY_5', 'PAY_6']
 
     data = fill_unknown(data, numeric_attrs, payment_attr, pay_cate_attr, cate_attrs)
     
