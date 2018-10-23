@@ -34,15 +34,15 @@ def trans_num_attrs(data, numeric_attrs):
         """
     return data
 def encode_cate_attrs(data, cate_attrs):
-    """
+    
     educateion = "EDUCATION" 
     edu = np.array(data[educateion].values)
     for i in range(edu.shape[0]):
-        if edu[i] == 0 or edu[i] > 4:
-            edu[i] = 4
+        if edu[i] > 4:
+            edu[i] = 5
     data[educateion] = edu
     #print(data[educateion][130])
-
+    """
     marrige = 'MARRIAGE'
     mar = np.array(data[marrige].values)
     for i in range(mar.shape[0]):
@@ -50,8 +50,10 @@ def encode_cate_attrs(data, cate_attrs):
             mar[i] = 3
     data[marrige] = mar
     """
+    
     print("encode_cate_attrs...")
     for i in cate_attrs[:]:
+        
         dummies_df = pd.get_dummies(data[i])
         dummies_df = dummies_df.rename(columns=lambda x: i+'_'+str(x))
         data = pd.concat([data,dummies_df],axis=1)
@@ -135,10 +137,10 @@ data = preprocess_data()
 print(data.shape)
 from numpy_neural_network import *
 neural_network = NeuralNetwork()
-neural_network.weigts_one = np.load("neural_network_weigts_one.npy")
-neural_network.bias_one = np.load("neural_network_bias_one.npy")
-neural_network.weighs_three = np.load("neural_network_weighs_three.npy")
-neural_network.bias_three = np.load("neural_network_bias_three.npy")
+neural_network.weigts_one = np.load("neural_network_weigts_one1.npy")
+neural_network.bias_one = np.load("neural_network_bias_one1.npy")
+neural_network.weighs_three = np.load("neural_network_weighs_three1.npy")
+neural_network.bias_three = np.load("neural_network_bias_three1.npy")
 predict = neural_network.predict(data)
 #neural_network.accuracy(predicted, total_ytrain)
 print(len(predict))

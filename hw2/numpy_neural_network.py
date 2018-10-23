@@ -4,14 +4,7 @@ class NeuralNetwork(object):
     
 
 
-    def __init__(self, learning_rate=0.01, epochs=15000, batch_size=50):
-        ''' 
-        This constructor is used to initilize hyperparams for our network
-
-        Inputs: learning_rata -  how fast are you going to train the network
-                Epochs -  how many times are you going to run forward and backward pass
-                batch_size -  how many samples are you feeding into netowrk at ones
-        '''
+    def __init__(self, learning_rate=0.01, epochs=15000, batch_size=50, feature_size = 33):
 
         self.learning_rate = learning_rate
         self.epochs = epochs
@@ -20,7 +13,7 @@ class NeuralNetwork(object):
 
         #in this case I have used random init for weights
         #Smarter way to initialize weights is Xavier initialization
-        self.weigts_one = np.random.randn(33, 50)
+        self.weigts_one = np.random.randn(feature_size, 50)
         self.bias_one = np.zeros((1, 50))
         #self.weigts_two = np.random.randn(50, 25)
         #self.bias_two = np.zeros((1, 25))
@@ -29,64 +22,61 @@ class NeuralNetwork(object):
         
     
     def sigmoid(self, x):
-        '''
-        Classical sigmoid activation function used in every layer in this network
-        '''
+        
         return 1 / (1 + np.exp(-x))
     
     def der_sigmoid(self, x):
-        '''
-        Derivation of the sigmoid activation function
-        '''
+        
         return (1 - x) * x
     
     def train(self, X ,y):
-        '''
-        Training function -  this function is where real magic is happening for our neural network
-        Whole training in other words - learning the best value for every weight in network is happing right here.
-
-
-
-        Input(s): X - features from our dataset
-                  y -  labels from our dataset
-        '''
-
+        
         #Because of the cost function you will need to reshape y array to : [len(y), 1]
         y_train = np.reshape(y, (len(y), 1))
         
+        time_per_epoch = len(X) // self.batch_size
+
         #Training loop
         for i in range(self.epochs):
             
-            idx = np.random.choice(len(X), self.batch_size, replace=True)
-            X_batch = X[idx, :]
-            y_batch = y_train[idx, :]
-            
-            l1, scores = self.forward(X_batch)
-            
-            cost = y_batch - scores
-            
-            if i % 1000 == 0:
-                print(np.mean(np.square(cost)))
+            for j in range(10):
+                idx = np.random.choice(len(X), self.batch_size, replace=True)
+
+                X_batch = X[idx, :]
+                y_batch = y_train[idx, :]
+                #first = j*self.batch_size
+                #last = (j+1)*self.batch_size
+                #if last>len(X):
+                #    last = len(X)
+                #X_batch = X[first:last, :]
+                #y_batch = y_train[first:last, :]
                 
-            #backprop
-            dscores = cost * self.der_sigmoid(scores)
-            dW3 = np.dot(l1.T, dscores)
-            db3 = np.sum(dscores, axis=0, keepdims=True)
-            #dl2 = np.dot(dscores, self.weighs_three.T) * self.der_sigmoid(l2)
-            #db2 = np.sum(dl2, axis=0, keepdims=True)
-            #dW2 = np.dot(l1.T, dl2)
-            dl1 = np.dot(dscores, self.weighs_three.T) * self.der_sigmoid(l1)
-            dW1 = np.dot(X_batch.T, dl1)
-            db1 = np.sum(dl1, axis=0, keepdims=True)
+                l1, scores = self.forward(X_batch)
                 
-            #NOTE: We are not using Regularizaiton term in this network
-            #Stochastic Gradient Descent
-            self.weigts_one += self.learning_rate * dW1
-            self.bias_one += self.learning_rate * db1
-            #self.weigts_two += self.learning_rate * dW2
-            #self.bias_two += self.learning_rate * db2
-            self.weighs_three += self.learning_rate * dW3
-            self.bias_three += self.learning_rate * db3
+                cost = y_batch - scores
+                
+                if i % 1000 == 0:
+                    print(np.mean(np.square(cost)))
+                    
+                #backprop
+                dscores = cost * self.der_sigmoid(scores)
+                dW3 = np.dot(l1.T, dscores)
+                db3 = np.sum(dscores, axis=0, keepdims=True)
+                #dl2 = np.dot(dscores, self.weighs_three.T) * self.der_sigmoid(l2)
+                #db2 = np.sum(dl2, axis=0, keepdims=True)
+                #dW2 = np.dot(l1.T, dl2)
+                dl1 = np.dot(dscores, self.weighs_three.T) * self.der_sigmoid(l1)
+                dW1 = np.dot(X_batch.T, dl1)
+                db1 = np.sum(dl1, axis=0, keepdims=True)
+                    
+                #NOTE: We are not using Regularizaiton term in this network
+                #Stochastic Gradient Descent
+                self.weigts_one += self.learning_rate * dW1
+                self.bias_one += self.learning_rate * db1
+                #self.weigts_two += self.learning_rate * dW2
+                #self.bias_two += self.learning_rate * db2
+                self.weighs_three += self.learning_rate * dW3
+                self.bias_three += self.learning_rate * db3
             
                 
     def forward(self, X):
