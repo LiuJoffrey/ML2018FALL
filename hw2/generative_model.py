@@ -26,7 +26,7 @@ def trans_num_attrs(data, numeric_attrs):
         name = i+"square"
         numeric_attrs.append(name)
         data[name] = data[i]**2
-
+    
     bining = [0,28,34,41,100] 
     bining_num = 4
     bining_attr = 'AGE'
@@ -63,7 +63,7 @@ def encode_cate_attrs(data, cate_attrs):
     edu = np.array(data[educateion].values)
     for i in range(edu.shape[0]):
         if edu[i] == 0 or edu[i] > 4:
-            edu[i] = 4
+            edu[i] = 5
     data[educateion] = edu
     #print(data[educateion][130])
     """
@@ -261,6 +261,6 @@ num_nor = np.array(num_nor)
 pay_cate_nor = np.array(pay_cate_nor)
 pay_ment_nor = np.array(pay_ment_nor)
 
-np.save("num_nor", num_nor)
+np.save("gen_num_nor", num_nor)
 #np.save("pay_cate_nor1", pay_cate_nor)
-np.save("pay_ment_nor", pay_ment_nor)
+np.save("gen_pay_ment_nor", pay_ment_nor)
