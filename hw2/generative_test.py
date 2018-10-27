@@ -127,7 +127,7 @@ def sigmoid(z):
     return 1.0 / (1.0+np.exp(-z))
 
 def preprocess_data():
-    test_data_path = arg[1]
+    test_data_path = arg[3]
     print("Loading data...")
     data = pd.read_csv(test_data_path)
     
@@ -167,7 +167,7 @@ for i in range(len(predict)):
         out.append(["id_"+str(i),1])
     else:
         out.append(["id_"+str(i),0])
-submission = open(arg[2], "w+")
+submission = open(arg[4], "w+")
 s = csv.writer(submission,delimiter=',',lineterminator='\n')
 s.writerow(["id","value"])
 for i in range(len(out)):
