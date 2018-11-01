@@ -11,8 +11,6 @@ class NeuralNetwork(object):
         self.batch_size = batch_size
         np.random.seed(0)
 
-        #in this case I have used random init for weights
-        #Smarter way to initialize weights is Xavier initialization
         self.weigts_one = np.random.randn(feature_size, 50)
         self.bias_one = np.zeros((1, 50))
         #self.weigts_two = np.random.randn(50, 25)
@@ -31,7 +29,6 @@ class NeuralNetwork(object):
     
     def train(self, X ,y):
         
-        #Because of the cost function you will need to reshape y array to : [len(y), 1]
         y_train = np.reshape(y, (len(y), 1))
         
         time_per_epoch = len(X) // self.batch_size
@@ -69,8 +66,6 @@ class NeuralNetwork(object):
                 dW1 = np.dot(X_batch.T, dl1)
                 db1 = np.sum(dl1, axis=0, keepdims=True)
                     
-                #NOTE: We are not using Regularizaiton term in this network
-                #Stochastic Gradient Descent
                 self.weigts_one += self.learning_rate * dW1
                 self.bias_one += self.learning_rate * db1
                 #self.weigts_two += self.learning_rate * dW2
@@ -80,24 +75,14 @@ class NeuralNetwork(object):
             
                 
     def forward(self, X):
-        '''
-        This function is used for forward propagation through our network
         
-        Input(s): X - features from dataset
-        '''
-
         l1 = self.sigmoid((np.dot(X, self.weigts_one) + self.bias_one))
         #l2 = self.sigmoid((np.dot(l1, self.weigts_two) + self.bias_two))
         scores = self.sigmoid((np.dot(l1, self.weighs_three) + self.bias_three))
         return l1, scores
     
     def predict(self, X):
-        '''
-        This function is used to threshold values from our network to 1 or 0 depending how big it is
-        because of the Sigmoid activation function we will get result between 0 and 1 for every sample
         
-        Input(s): X - features from dataset
-        '''
         l1, scores = self.forward(X)
         pred = []
         for i in range(len(scores)):
@@ -108,12 +93,7 @@ class NeuralNetwork(object):
         return pred
     
     def accuracy(self, pred, y_test):
-        '''
-        Simple function to check how accuarte is neural network.
-
-        Input(s): pred - predicted values from the network
-                 y_test - currect values for our TEST set
-        '''
+        
         assert len(pred) == len(y_test)
         true_pred = 0
         for i in range(len(pred)):
