@@ -1,1 +1,1 @@
-python3 generative_test.py $1 $2 $3 $4
+python3 logistic_test.py $1 $2 $3 $4
