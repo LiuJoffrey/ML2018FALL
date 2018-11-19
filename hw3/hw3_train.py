@@ -20,17 +20,17 @@ from model import *
 arg = sys.argv
 print(arg)
 
-#raw = pd.read_csv(arg[1])
-#label = raw.iloc[:,0].values
-#print(label.shape)
-#label = to_categorical(label)
-#print(label.shape)
-#np.save("reshape_label", label)
-#data = raw.iloc[:,1]
-#data = data.str.split(expand = True).astype('float32').values
-#data = np.reshape(data, (-1,48,48,1))
-#print(data.shape)
-#np.save("reshape_data", data)
+raw = pd.read_csv(arg[1])
+label = raw.iloc[:,0].values
+print(label.shape)
+label = to_categorical(label)
+print(label.shape)
+np.save("reshape_label", label)
+data = raw.iloc[:,1]
+data = data.str.split(expand = True).astype('float32').values
+data = np.reshape(data, (-1,48,48,1))
+print(data.shape)
+np.save("reshape_data", data)
 """
 import tensorflow as tf
 config = tf.ConfigProto()
@@ -39,8 +39,8 @@ config.gpu_options.per_process_gpu_memory_fraction = 0.4
 K.tensorflow_backend.set_session(tf.Session(config=config))
 """
 
-data = np.load("reshape_data.npy")
-label = np.load("reshape_label.npy")
+#data = np.load("reshape_data.npy")
+#label = np.load("reshape_label.npy")
 print(data.shape)
 print(label.shape)
 data = data /255.
