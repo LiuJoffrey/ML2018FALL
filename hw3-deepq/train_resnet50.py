@@ -47,7 +47,8 @@ def get_optimizer(params):
     """
     # this function is to determine what optimizer to ues, can be Adam, RMSprop SGD...
     #optimizer = torch.optim.SGD(params, lr=0.001)
-    optimizer = torch.optim.SGD(params, lr=0.1)
+    optimizer = torch.optim.SGD(params, lr=0.1, weight_decay=0)
+    #optimizer = torch.optim.Adam(params, lr=0.1)
     #optimizer = torch.optim.Adam(params, lr=0.001, weight_decay=0.0005)
     return optimizer
 
@@ -101,13 +102,36 @@ def before_epoch(train_history, validation_history):
     """
     transform = transforms.Compose([
         transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomCrop(size=180),
         transforms.RandomAffine(30, translate=(0.2,0.2)),
-        #transforms.RandomCrop((180,180))
+        transforms.RandomApply([transforms.Grayscale(3)], 0.3),
         transforms.Resize(224),
         transforms.ToTensor()
         ])
     n_epoch = len(train_history)
-    return {"transform": transform, "batchsize": 64}
+    
+    batchsize = 32
+    factor = n_epoch // 10
+    batchsize = batchsize + (8*factor)
+    batchsize = min(batchsize, 64) 
+    print("Batchsize: ", batchsize)
+    
+    
+    lr = 0.01
+    lr_factor = n_epoch // 20
+    lr = lr / 10**lr_factor
+    #print("learning rate: ", lr)
+    weight_decay = 0
+    if n_epoch >= 20:
+      weight_decay = 0.000001
+      weight_decay_factor = n_epoch // 20
+      weight_decay = weight_decay * (10**weight_decay_factor)
+    print("learning rate: ", lr, "weight_decay: ",weight_decay)
+    
+    
+    
+    
+    return {"transform": transform, "batchsize": batchsize}
 
 def before_batch(train_history, validation_history):
     """
@@ -126,8 +150,22 @@ def before_batch(train_history, validation_history):
     notes:
         drop_out should always be None when using resnet50 since there are no dropout layers in it
     """
+    n_epoch = len(train_history)
+    
+    lr = 0.01
+    lr_factor = n_epoch // 20
+    lr = lr / 10**lr_factor
+    #print("learning rate: ", lr)
+    weight_decay = 0
+    if n_epoch >= 20:
+      weight_decay = 0.0001
+      weight_decay_factor = n_epoch // 20
+      weight_decay = weight_decay * (10**weight_decay_factor)
+    #print("learning rate: ", lr, "weight_decay: ",weight_decay)
+    
+    
     #return {"optimizer": {"lr": 0.001}, "batch_norm": None, "drop_out": None}
-    return {"optimizer": {"lr": 0.01}, "batch_norm": 0.5, "drop_out": None}
+    return {"optimizer": {"lr": lr, "weight_decay":weight_decay}, "batch_norm": 0.5, "drop_out": None}
     
 def save_model_as(train_history, validation_history):
     """
@@ -149,11 +187,11 @@ def save_model_as(train_history, validation_history):
     if validation_history[n_epoch-1][0] >= max(total_acc):
         print("best_val_acc: ", validation_history[n_epoch-1][0])
         best_val_acc = validation_history[n_epoch-1][0]
-        return str(n_epoch)+'_'+str(best_val_acc)+'.resnet50'
+        return str(n_epoch)+'_'+str(best_val_acc)+'.resnet50.save.pth.tar'
     n_epoch = len(train_history)
     if n_epoch == 50:
-        #return 'resnet.save.pth.tar'
-        return 'resnet50_final'
+        return 'resnet.save.pth.tar'
+        #return 'resnet50_final'
     else:
         return None
 
