@@ -10,4 +10,15 @@ if [ -f "./model_reloadAlexnet_0.72588l.h5" ]; then
 else
     wget https://www.dropbox.com/s/mrq5gfslicjkjy5/model_reloadAlexnet_0.72588l.h5
 fi
+
+
+if [ -f "./1_modelAlexnet_00079_0.80600.h5" ]; then
+    # 檔案 /path/to/dir/filename 存在
+    echo "1_modelAlexnet_00079_0.80600.h5 exists, skip download."
+else
+    wget https://www.dropbox.com/s/fg4xvlrs2x1z8cr/1_modelAlexnet_00079_0.80600.h5
+fi
+
+
 python hw3_test.py $1 $2
+
