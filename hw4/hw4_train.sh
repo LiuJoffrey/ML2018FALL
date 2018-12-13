@@ -1,2 +1,2 @@
 #!/bin/bash
-python hw4_train.py $1 $2 $3
+python hw4_train.py $1 $2 $3 $4

@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import numpy as np
@@ -16,7 +13,8 @@ from gensim.test.utils import common_texts, get_tmpfile
 arg = sys.argv
 data_csv = arg[1]
 label_csv = arg[2]
-dict_big = arg[3]
+test_csv = arg[3]
+dict_big = arg[4]
 
 jieba.set_dictionary(dict_big)
 jieba.add_word('姜太公')
@@ -78,25 +76,30 @@ with open(label_csv) as csvfile:
     for row in reader:
         all_label.append(float(row['label']))
 
+with open(test_csv) as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        all_test.append(row['comment'])
 
 all_label = np.array(all_label)
 
 all_comment = pre_processinog(all_comment)
+all_test = pre_processinog(all_test)
 
-
-full_text = all_comment # train + test
+full_text = all_comment+all_test # train + test
 
 cut_lines = jieba_lines(all_comment)
-
+cut_test = jieba_lines(all_test)
 np.save("cut_lines", cut_lines)
-
+np.save("cut_test", cut_test)
 
 
 cut_lines = np.load("cut_lines.npy")
-
+cut_test = np.load("cut_test.npy")
 cut_lines = cut_lines.tolist()
+cut_test = cut_test.tolist()
 
-full_cut_text = cut_lines 
+full_cut_text = cut_lines + cut_test 
 print("finish jieba")
 
 embedding_model = Word2Vec(full_cut_text, size=300, window=4, min_count=1, iter=100)
@@ -117,7 +120,7 @@ tokenizer = Tokenizer(num_words=30000, filters="\n") #30000
 tokenizer.fit_on_texts(full_cut_text)
 with open('tokenizer.pickle', 'wb') as handle:
     pickle.dump(tokenizer, handle)
-
+exit(1)
 """
 with open('tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
@@ -172,7 +175,27 @@ model.compile(loss='binary_crossentropy',
                 optimizer='adam',
                 metrics=['accuracy'])
 check_save = ModelCheckpoint("plot_modelW2V-{epoch:05d}-{val_acc:.5f}.h5",monitor='val_acc',save_best_only=True)
-model.fit(trainx, trainy, validation_data=(validx, validy),
-            epochs=20, batch_size=batch_size,callbacks=[check_save])
+history = model.fit(trainx, trainy, validation_data=(validx, validy),
+            epochs=10, batch_size=batch_size,callbacks=[check_save])
+
+
+"""
+import matplotlib.pyplot as plt
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+"""
 exit(1)
 
