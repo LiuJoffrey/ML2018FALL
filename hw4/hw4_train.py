@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import numpy as np
@@ -120,7 +123,7 @@ tokenizer = Tokenizer(num_words=30000, filters="\n") #30000
 tokenizer.fit_on_texts(full_cut_text)
 with open('tokenizer.pickle', 'wb') as handle:
     pickle.dump(tokenizer, handle)
-exit(1)
+
 """
 with open('tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
