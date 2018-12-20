@@ -12,6 +12,12 @@ else
     wget https://www.dropbox.com/s/c8f20g5m0bv6xl7/0_modelW2V-00004-0.75780.h5
 fi
 
+if [ -f "./new_modelW2V-00003-0.76187.h5" ]; then
+    # 檔案 /path/to/dir/filename 存在
+    echo "new_modelW2V-00003-0.76187.h5 exists, skip download."
+else
+    wget https://www.dropbox.com/s/bowy6n0crbmqm94/new_modelW2V-00003-0.76187.h5
+fi
 
 #if [ -f "./1_modelW2V-00002-0.75650.h5" ]; then
 #    # 檔案 /path/to/dir/filename 存在

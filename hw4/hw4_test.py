@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 import numpy as np
@@ -70,7 +67,11 @@ with open(test_csv) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         all_test.append(row['comment'])
-		
+
+
+
+
+
 all_test = pre_processinog(all_test)		
 cut_test = jieba_lines(all_test)
 np.save("cut_test", cut_test)
@@ -91,22 +92,33 @@ print("finish pad ")
 # modelW2V-00002-0.72970.h5 0.72532
 # modelW2V-00004-0.73410.h5 0.73647
 # modelW2V-00003-0.76110.h5 0.75845
-model = load_model("modelW2V-00003-0.76110.h5")
 
+
+
+model = load_model("modelW2V-00003-0.76110.h5")
+predict = model.predict(test, verbose=1, batch_size=80)
+model = None
 model0 = load_model("0_modelW2V-00004-0.75780.h5")
+predict0 = model0.predict(test, verbose=1, batch_size=80)
+model0 = None
+model1 = load_model("new_modelW2V-00003-0.76187.h5")
+predict1 = model1.predict(test, verbose=1, batch_size=80)
+model0 = None
 #model1 = load_model("1_modelW2V-00002-0.75650.h5")
 #model2 = load_model("2_modelW2V-00003-0.75340.h5")
 #model3 = load_model("3_modelW2V-00002-0.75800.h5")
 
 print("finish load model")
-predict = model.predict(test, verbose=1)
-predict0 = model0.predict(test, verbose=1)
+
+
+
 #predict1 = model1.predict(test, verbose=1)
 #predict2 = model2.predict(test, verbose=1)
 #predict3 = model3.predict(test, verbose=1)
 
 #predict = (predict + predict0 + predict1 + predict2)/4
-predict = (predict + predict0)/2
+predict = (predict + predict0+predict1)/3
+
 
 
 out = []
